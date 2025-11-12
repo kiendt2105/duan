@@ -22,3 +22,5 @@ match ($act) {
     '/'=>(new ProductController())->Home(),
 
 };
+session_start();
+require_once __DIR__. '/router.php';

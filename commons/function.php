@@ -45,3 +45,17 @@ function deleteFile($file){
 die;
 
 }
+// commons/function.php
+
+function isAdmin() {
+    return isset($_SESSION['user']) && $_SESSION['user']['role'] === 'admin';
+}
+function isHdv() {
+    return isset($_SESSION['user']) && $_SESSION['user']['role'] === 'hdv';
+}
+
+// Hàm redirect tiện ích
+function redirect($url) {
+    header("Location: $url");
+    exit;
+}
