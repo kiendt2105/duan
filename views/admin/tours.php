@@ -1,8 +1,9 @@
 <?php
+// views/admin/tours.php → CHỈ LÀ FILE GỌI LAYOUT
 $title = "Quản lý Tour";
 $current_page = "tours";
-$content = __DIR__ . '/tours.php';
-include __DIR__ . '/layout.php';
+
+require __DIR__ . '/layout.php';
 ?>
 
 <h1 class="h3 mb-4 text-gray-800">Danh sách Tour</h1>

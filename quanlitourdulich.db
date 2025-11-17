@@ -1,0 +1,127 @@
+-- ============================================
+-- DATABASE: QuanLyTourDuLich
+-- ============================================
+DROP DATABASE IF EXISTS QuanLyTourDuLich;
+CREATE DATABASE QuanLyTourDuLich CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE QuanLyTourDuLich;
+
+-- 1. Người dùng hệ thống (Admin, HDV)
+CREATE TABLE Users (
+    UserID INT PRIMARY KEY AUTO_INCREMENT,
+    HoTen VARCHAR(100) NOT NULL,
+    Email VARCHAR(100) UNIQUE NOT NULL,
+    MatKhau VARCHAR(255) NOT NULL,
+    SoDienThoai VARCHAR(20),
+    VaiTro ENUM('admin', 'hdv') NOT NULL DEFAULT 'hdv',
+    AnhDaiDien VARCHAR(255),
+    TrangThai ENUM('hoatdong', 'khoa') DEFAULT 'hoatdong',
+    NgayTao DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 2. Tour du lịch
+CREATE TABLE Tours (
+    TourID INT PRIMARY KEY AUTO_INCREMENT,
+    TenTour VARCHAR(255) NOT NULL,
+    MoTa TEXT,
+    GiaTour DECIMAL(12,2) NOT NULL,
+    SoCho INT NOT NULL,
+    NgayKhoiHanh DATE NOT NULL,
+    NgayKetThuc DATE NOT NULL,
+    DiemXuatPhat VARCHAR(255),
+    DiemDen VARCHAR(255),
+    AnhBia VARCHAR(255),
+    HDV_ID INT,
+    TrangThai ENUM('sapdienra', 'dangdienra', 'hoanthanh', 'huy') DEFAULT 'sapdienra',
+    NgayTao DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (HDV_ID) REFERENCES Users(UserID) ON DELETE SET NULL
+);
+
+-- 3. Khách hàng (người đặt tour)
+CREATE TABLE KhachHang (
+    KhachID INT PRIMARY KEY AUTO_INCREMENT,
+    HoTen VARCHAR(100) NOT NULL,
+    Email VARCHAR(100),
+    SoDienThoai VARCHAR(20) NOT NULL,
+    CMND VARCHAR(20),
+    DiaChi TEXT,
+    GhiChuDacBiet TEXT -- Ăn chay, bệnh lý, yêu cầu riêng
+);
+
+-- 4. Booking (đặt tour)
+CREATE TABLE Bookings (
+    BookingID INT PRIMARY KEY AUTO_INCREMENT,
+    TourID INT NOT NULL,
+    KhachID INT NOT NULL,
+    SoLuongNguoi INT NOT NULL DEFAULT 1,
+    TongTien DECIMAL(12,2) NOT NULL,
+    NgayDat DATETIME DEFAULT CURRENT_TIMESTAMP,
+    TrangThai ENUM('daxacnhan', 'dathanhtoan', 'dacheckin', 'hoanthanh', 'huy') DEFAULT 'daxacnhan',
+    PhuongThucThanhToan VARCHAR(50),
+    GhiChu TEXT,
+    FOREIGN KEY (TourID) REFERENCES Tours(TourID) ON DELETE CASCADE,
+    FOREIGN KEY (KhachID) REFERENCES KhachHang(KhachID) ON DELETE CASCADE
+);
+
+-- 5. Danh sách khách trong đoàn (check-in riêng)
+CREATE TABLE KhachTrongDoan (
+    ID INT PRIMARY KEY AUTO_INCREMENT,
+    BookingID INT NOT NULL,
+    HoTen VARCHAR(100) NOT NULL,
+    CMND VARCHAR(20),
+    CheckIn BOOLEAN DEFAULT FALSE,
+    DiemDanh DECIMAL(1,1) DEFAULT NULL, -- 1.0 đến 5.0
+    FOREIGN KEY (BookingID) REFERENCES Bookings(BookingID) ON DELETE CASCADE
+);
+
+-- 6. Dịch vụ đi kèm (ăn uống, xe, vé tham quan...)
+CREATE TABLE DichVu (
+    DichVuID INT PRIMARY KEY AUTO_INCREMENT,
+    TenDichVu VARCHAR(100) NOT NULL,
+    GiaDichVu DECIMAL(12,2) NOT NULL,
+    MoTa TEXT
+);
+
+-- 7. Chi tiết dịch vụ trong booking
+CREATE TABLE ChiTietDichVu (
+    ID INT PRIMARY KEY AUTO_INCREMENT,
+    BookingID INT NOT NULL,
+    DichVuID INT NOT NULL,
+    SoLuong INT NOT NULL DEFAULT 1,
+    FOREIGN KEY (BookingID) REFERENCES Bookings(BookingID) ON DELETE CASCADE,
+    FOREIGN KEY (DichVuID) REFERENCES DichVu(DichVuID) ON DELETE CASCADE
+);
+
+-- 8. Nhật ký tour (HDV ghi chép)
+CREATE TABLE NhatKyTour (
+    NhatKyID INT PRIMARY KEY AUTO_INCREMENT,
+    TourID INT NOT NULL,
+    Ngay DATE NOT NULL,
+    NoiDung TEXT NOT NULL,
+    AnhSuKien VARCHAR(255),
+    HDV_ID INT NOT NULL,
+    NgayTao DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (TourID) REFERENCES Tours(TourID) ON DELETE CASCADE,
+    FOREIGN KEY (HDV_ID) REFERENCES Users(UserID) ON DELETE CASCADE
+);
+
+-- 9. Đánh giá tour (khách hoặc HDV)
+CREATE TABLE DanhGia (
+    DanhGiaID INT PRIMARY KEY AUTO_INCREMENT,
+    BookingID INT NOT NULL,
+    DiemSo DECIMAL(2,1) CHECK (DiemSo >= 1 AND DiemSo <= 5),
+    NhanXet TEXT,
+    NgayDanhGia DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (BookingID) REFERENCES Bookings(BookingID) ON DELETE CASCADE
+);
+
+-- 10. Hóa đơn
+CREATE TABLE HoaDon (
+    HoaDonID INT PRIMARY KEY AUTO_INCREMENT,
+    BookingID INT NOT NULL,
+    TongTien DECIMAL(12,2) NOT NULL,
+    NgayThanhToan DATETIME,
+    PhuongThuc VARCHAR(50),
+    NhanVienID INT, -- Admin xuất hóa đơn
+    FOREIGN KEY (BookingID) REFERENCES Bookings(BookingID) ON DELETE CASCADE,
+    FOREIGN KEY (NhanVienID) REFERENCES Users(UserID) ON DELETE SET NULL
+);
