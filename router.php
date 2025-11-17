@@ -3,23 +3,22 @@
 require_once __DIR__.'/commons/function.php';
 require_once __DIR__.'/commons/env.php';
 
-// Lấy URL (loại bỏ query string)
+// Lấy URL hiện tại (loại bỏ query string)
 $request = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-// Loại bỏ dấu / đầu và cuối
 $request = trim($request, '/');
 
 // ------------------- ĐỊNH NGHĨA ROUTES -------------------
 $routes = [
-    // ------------------- PUBLIC -------------------
-    ''                => ['controller' => 'HomeController',   'action' => 'index'],   // trang chủ
+    // PUBLIC
+    ''                => ['controller' => 'HomeController',   'action' => 'index'],
     'login'           => ['controller' => 'AuthController',   'action' => 'login'],
     'logout'          => ['controller' => 'AuthController',   'action' => 'logout'],
 
-    // ------------------- ADMIN --------------------
+    // ADMIN
     'admin'                     => ['controller' => 'AdminController', 'action' => 'dashboard'],
     'admin/tours'               => ['controller' => 'AdminController', 'action' => 'listTours'],
     'admin/tours/create'        => ['controller' => 'AdminController', 'action' => 'createTour'],
-    'admin/tours/edit/(\d+)'    => ['controller' => 'AdminController', 'action' => 'editTour'],   // id
+    'admin/tours/edit/(\d+)'    => ['controller' => 'AdminController', 'action' => 'editTour'],
     'admin/tours/delete/(\d+)'  => ['controller' => 'AdminController', 'action' => 'deleteTour'],
 
     'admin/bookings'            => ['controller' => 'AdminController', 'action' => 'listBookings'],
@@ -30,25 +29,30 @@ $routes = [
 
     'admin/reports'             => ['controller' => 'AdminController', 'action' => 'reports'],
 
-    // ------------------- HDV (Hướng dẫn viên) --------------------
+    // HDV
     'hdv'                       => ['controller' => 'HdvController',   'action' => 'dashboard'],
     'hdv/tours'                 => ['controller' => 'HdvController',   'action' => 'listMyTours'],
-    'hdv/tours/(\d+)'           => ['controller' => 'HdvController',   'action' => 'detailTour'],      // id tour
-    'hdv/tours/(\d+)/checkin'   => ['controller' => 'HdvController',   'action' => 'checkin'],         // id tour
-    'hdv/tours/(\d+)/update'    => ['controller' => 'HdvController',   'action' => 'updateStatus'],    // id tour
-    'hdv/tours/(\d+)/feedback'  => ['controller' => 'HdvController',   'action' => 'feedback'],        // id tour
+    'hdv/tours/(\d+)'           => ['controller' => 'HdvController',   'action' => 'detailTour'],
+    'hdv/tours/(\d+)/checkin'   => ['controller' => 'HdvController',   'action' => 'checkin'],
+    'hdv/tours/(\d+)/update'    => ['controller' => 'HdvController',   'action' => 'updateStatus'],
+    'hdv/tours/(\d+)/feedback'  => ['controller' => 'HdvController',   'action' => 'feedback'],
 ];
 
 // ------------------- TÌM ROUTE PHÙ HỢP -------------------
 $matched = false;
+$controllerName = '';
+$actionName = '';
+$params = [];
+
 foreach ($routes as $pattern => $handler) {
-    // Thay \d+ thành regex thực tế
-    $regex = '#^' . preg_replace('#\(\\\d\+\)#', '(\d+)', $pattern) . '$#';
+    // Escape và thay thế (\d+) thành (\d+)
+    $regex = '#^' . preg_replace('#\\\(d\+)#', '(\d+)', preg_quote($pattern, '#')) . '$#';
+    
     if (preg_match($regex, $request, $matches)) {
-        array_shift($matches);               // bỏ phần khớp toàn bộ
+        array_shift($matches); // bỏ phần khớp toàn bộ
         $controllerName = $handler['controller'];
         $actionName     = $handler['action'];
-        $params         = $matches;          // các id, ...
+        $params         = $matches;
         $matched        = true;
         break;
     }
@@ -63,19 +67,17 @@ if (!$matched) {
 // ------------------- GỌI CONTROLLER -------------------
 $controllerFile = __DIR__.'/controllers/'.$controllerName.'.php';
 if (!file_exists($controllerFile)) {
-    die("Controller $controllerName không tồn tại");
+    die("Controller $controllerName không tồn tại: $controllerFile");
 }
 require_once $controllerFile;
 
-$controller = new $controllerName();
-
-// Kiểm tra quyền (sẽ thêm middleware sau)
+// Kiểm tra quyền TRƯỚC khi gọi action
 if (strpos($request, 'admin') === 0 && !isAdmin()) {
-    header('Location: /login'); exit;
+    redirect('login');
 }
 if (strpos($request, 'hdv') === 0 && !isHdv()) {
-    header('Location: /login'); exit;
+    redirect('login');
 }
 
-// Gọi action + truyền tham số
+$controller = new $controllerName();
 call_user_func_array([$controller, $actionName], $params);

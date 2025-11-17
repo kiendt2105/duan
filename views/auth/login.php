@@ -25,7 +25,7 @@
                         <small class="text-muted">
                             Test nhanh:<br>
                             Admin: admin@example.com / 123<br>
-                            HDV: hdv@example.com / 123
+                            HDV: hdv@example.com / 123////
                         </small>
                     </p>
                 </div>

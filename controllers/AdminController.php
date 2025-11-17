@@ -1,16 +1,51 @@
 <?php
+// controllers/AdminController.php
+
 class AdminController {
-    public function dashboard() {
-        // Kiểm tra lại quyền (đề phòng)
-        if (!isAdmin()) { redirect('/login'); }
-        require __DIR__.'/../views/admin/dashboard.php';
+    public function dashboard(): void {
+        $title = "Dashboard";
+        $current_page = "dashboard";
+        require __DIR__ . '/../views/admin/layout.php';
     }
 
-    public function listTours() {
-        // TODO: lấy danh sách tour từ model
-        $tours = []; // $tourModel->getAll();
-        require __DIR__.'/../views/admin/tours_list.php';
+    public function tours(): void {
+        require_once __DIR__ . '/../models/TourModel.php';
+        $tourModel = new TourModel();
+        $tours = $tourModel->getAll();
+
+        $title = "Quản lý Tour";
+        $current_page = "tours";
+        require __DIR__ . '/../views/admin/layout.php'; // ← DÙNG LAYOUT
     }
 
-    // các action khác tương tự...
+    public function createTour(): void {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            require_once __DIR__ . '/../models/TourModel.php';
+            $tourModel = new TourModel();
+
+            $anhBia = '';
+            if (isset($_FILES['AnhBia']) && $_FILES['AnhBia']['error'] === 0) {
+                $anhBia = uploadFile(file: $_FILES['AnhBia'], folderSave: 'uploads/');
+            }
+
+            $data = [
+                'TenTour' => $_POST['TenTour'],
+                'MoTa' => $_POST['MoTa'],
+                'GiaTour' => $_POST['GiaTour'],
+                'SoCho' => $_POST['SoCho'],
+                'NgayKhoiHanh' => $_POST['NgayKhoiHanh'],
+                'NgayKetThuc' => $_POST['NgayKetThuc'],
+                'DiemXuatPhat' => $_POST['DiemXuatPhat'],
+                'DiemDen' => $_POST['DiemDen'],
+                'AnhBia' => $anhBia,
+                'HDV_ID' => $_POST['HDV_ID'] ?? null
+            ];
+
+            $tourModel->create($data);
+            header('Location: ' . BASE_URL . 'admin/tours');
+            exit;
+        }
+
+        // Nếu GET → không làm gì, form ở modal
+    }
 }
