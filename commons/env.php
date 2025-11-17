@@ -12,3 +12,8 @@ define('DB_PASSWORD', '');
 define('DB_NAME'    , 'duanmau');  // Tên database
 
 define('PATH_ROOT'    , __DIR__ . '/../');
+
+// URL tĩnh (public)
+define('PUBLIC_URL', BASE_URL . 'public/');
+// URL assets của admin
+define('ADMIN_ASSET', PUBLIC_URL . 'admin/assets/');

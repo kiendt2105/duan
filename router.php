@@ -71,10 +71,10 @@ $controller = new $controllerName();
 
 // Kiểm tra quyền (sẽ thêm middleware sau)
 if (strpos($request, 'admin') === 0 && !isAdmin()) {
-    header('Location: /login'); exit;
+header('Location: ' . BASE_URL . 'login'); exit;
 }
 if (strpos($request, 'hdv') === 0 && !isHdv()) {
-    header('Location: /login'); exit;
+header('Location: ' . BASE_URL . 'login'); exit;
 }
 
 // Gọi action + truyền tham số

@@ -1,10 +1,17 @@
 <?php
+// controllers/AdminController.php
 class AdminController {
     public function dashboard() {
-        // Kiểm tra lại quyền (đề phòng)
-        if (!isAdmin()) { redirect('/login'); }
-        require __DIR__.'/../views/admin/dashboard.php';
+        require __DIR__ . '/../views/admin/dashboard.php';
     }
+
+    public function tours() {
+        require __DIR__ . '/../views/admin/tours.php';
+    }
+
+
+
+
 
     public function listTours() {
         // TODO: lấy danh sách tour từ model

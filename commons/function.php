@@ -55,7 +55,12 @@ function isHdv() {
 }
 
 // Hàm redirect tiện ích
-function redirect($url) {
-    header("Location: $url");
+function redirect(string $url): never {
+    // nếu không phải http(s) tuyệt đối thì tự ghép BASE_URL
+    if (!preg_match('~^https?://~', $url)) {
+        $url = rtrim(BASE_URL, '/') . '/' . ltrim($url, '/');
+    }
+    header('Location: ' . $url);
     exit;
 }
+
