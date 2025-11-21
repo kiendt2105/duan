@@ -37,6 +37,29 @@ $routes = [
     'hdv/tours/(\d+)/checkin'   => ['controller' => 'HdvController',   'action' => 'checkin'],         // id tour
     'hdv/tours/(\d+)/update'    => ['controller' => 'HdvController',   'action' => 'updateStatus'],    // id tour
     'hdv/tours/(\d+)/feedback'  => ['controller' => 'HdvController',   'action' => 'feedback'],        // id tour
+    
+    // Tours
+   // Tours
+    'tours'              => ['controller' => 'TourController', 'action' => 'list'],
+    'tours/create'       => ['controller' => 'TourController', 'action' => 'create'],
+    'tours/(\d+)/edit'   => ['controller' => 'TourController', 'action' => 'edit'],
+    'tours/(\d+)/delete' => ['controller' => 'TourController', 'action' => 'delete'],
+
+
+    // Schedule
+    'admin/schedule'                  => ['controller' => 'ScheduleController', 'action' => 'index'],
+    'admin/schedule/create'           => ['controller' => 'ScheduleController', 'action' => 'create'],
+    'admin/schedule/(\d+)/detail'     => ['controller' => 'ScheduleController', 'action' => 'detail'],
+    'admin/schedule/(\d+)/delete'     => ['controller' => 'ScheduleController', 'action' => 'delete'],
+    'admin/schedule/(\d+)/assign'     => ['controller' => 'GuideController', 'action' => 'assign'],
+    // Customers
+    'admin/customers/(\d+)'           => ['controller' => 'CustomerController', 'action' => 'list'],
+    'admin/customers/create'          => ['controller' => 'CustomerController', 'action' => 'create'],
+
+    // Guides
+    'guides'                    => ['controller' => 'GuideController', 'action' => 'list'],
+    'guides/create'             => ['controller' => 'GuideController', 'action' => 'create'],
+    
 ];
 
 // ------------------- TÌM ROUTE PHÙ HỢP -------------------
